@@ -1,0 +1,75 @@
+import java.io.*;
+import java.util.Scanner;
+
+class Faculty implements Serializable {
+    int code;
+    String name;
+    String dept;
+    String position;
+
+    public Faculty(int code, String name, String dept, String position) {
+        this.code = code;
+        this.name = name;
+        this.dept = dept;
+        this.position = position;
+    }
+
+    @Override
+    public String toString() {
+        return "Code: " + code + "\nName: " + name + "\nDepartment: " + dept + "\nPosition: " + position;
+    }
+}
+
+public class FacultyManagement {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        int n = 3; // Set the number of faculty objects to be stored
+
+        // Create and store faculty objects to a file
+        try (FileOutputStream fos = new FileOutputStream("faculty_data.ser");
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+
+            for (int i = 0; i < n; i++) {
+                System.out.println("Enter Faculty Details:");
+                System.out.print("Code: ");
+                int code = scanner.nextInt();
+                scanner.nextLine(); // Consume the newline
+                System.out.print("Name: ");
+                String name = scanner.nextLine();
+                System.out.print("Department: ");
+                String dept = scanner.nextLine();
+                System.out.print("Position: ");
+                String position = scanner.nextLine();
+
+                Faculty faculty = new Faculty(code, name, dept, position);
+                oos.writeObject(faculty);
+            }
+
+            System.out.println("Faculty data stored in the file.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Search for faculty information by code
+        System.out.print("Enter Faculty Code to search: ");
+        int searchCode = scanner.nextInt();
+
+        try (FileInputStream fis = new FileInputStream("faculty_data.ser");
+             ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            while (true) {
+                Faculty faculty = (Faculty) ois.readObject();
+                if (faculty.code == searchCode) {
+                    System.out.println("Faculty Information:");
+                    System.out.println(faculty);
+                    break; // Stop searching after finding the match
+                }
+            }
+        } catch (EOFException | ClassNotFoundException e) {
+            System.out.println("Faculty with code " + searchCode + " not found.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
